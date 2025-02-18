@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Resources\SaleGroupResource;
 use App\Models\Product;
 use App\Models\SoldGroup;
 use App\Models\SoldItem;
@@ -20,6 +21,18 @@ class SaleController extends Controller
     public function __construct(PermissionService $permissionService)
     {
         $this->permissionService = $permissionService;
+    }
+
+    public function index(){
+        $response = $this->permissionService->hasPermission('sale', 'add');
+
+        if ($response) {
+            return $response;
+        }
+
+        $sold = SoldGroup::latest()->paginate(10);
+
+        return SaleGroupResource::collection($sold);
     }
 
     public function store(Request $request)

@@ -33,7 +33,8 @@ Route::group(['middleware' => ['auth:sanctum']], function () {
     Route::post('/admin/deleteproduct/{id}', [ProductController::class, 'destroy']);
 
     Route::post('/admin/sale', [SaleController::class, 'store']);
-    Route::post('/admin/editsale/{id}', [SaleController::class, 'edit']);
+    Route::post('/admin/editsold/{id}', [SaleController::class, 'edit']);
+    Route::get('/admin/soldlist', [SaleController::class, 'index']);
 
     Route::post('/logout', [AuthController::class, 'logout']);
 });
