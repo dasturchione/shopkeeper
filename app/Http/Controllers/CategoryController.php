@@ -37,6 +37,18 @@ class CategoryController extends Controller
         return BrandResource::collection($categorys);
     }
 
+    public function all()
+    {
+        $response = $this->permissionService->hasPermission('category', 'view');
+
+        if ($response) {
+            return $response;
+        }
+
+        $query = Category::latest()->paginate(10);
+        return BrandResource::collection($query);
+    }
+
     // Create a new category
     public function store(Request $request)
     {

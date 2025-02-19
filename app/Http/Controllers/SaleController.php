@@ -8,6 +8,7 @@ use App\Models\SoldGroup;
 use App\Models\SoldItem;
 use App\Models\Store;
 use App\Services\PermissionService;
+use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
@@ -30,7 +31,26 @@ class SaleController extends Controller
             return $response;
         }
 
-        $sold = SoldGroup::latest()->paginate(10);
+        $search = request()->query('search');
+
+        $query = SoldGroup::query();
+
+        if ($search) {
+            $query->where(function ($q) use ($search) {
+                if (preg_match('/\d{4}-\d{2}-\d{2}/', $search, $match)) {
+                    $date = Carbon::parse($match[0])->format('Y-m-d');
+                    $q->orWhereDate('created_at', $date);
+                }
+            })
+            ->orWhereHas('vendor', function ($q) use ($search) {
+                $q->where('name', 'like', '%' . $search . '%');
+            })
+            ->orWhereHas('client', function ($q) use ($search) {
+                $q->where('name', 'like', '%' . $search . '%');
+            });
+        }
+
+        $sold = $query->latest()->paginate(10);
 
         return SaleGroupResource::collection($sold);
     }
@@ -69,7 +89,7 @@ class SaleController extends Controller
             $shop = Store::where('id', $user->store_id)->first();
 
             $s_group = SoldGroup::create([
-                'vendor'        => $user->id,
+                'vendor_id'        => $user->id,
                 'client_id'     => $request->client,
                 'status'        => $request->status,
                 'store_id'      => $user->store_id,
@@ -148,7 +168,7 @@ class SaleController extends Controller
             if ($s_group) {
                 // Yangilash
                 $s_group->update([
-                    'vendor'        => $user->id,
+                    'vendor_id'        => $user->id,
                     'client_id'     => $request->client,
                     'status'        => $request->status,
                     'store_id'      => $user->store_id,

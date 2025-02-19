@@ -37,6 +37,18 @@ class BrandController extends Controller
         return BrandResource::collection($brands);
     }
 
+    public function all()
+    {
+        $response = $this->permissionService->hasPermission('brand', 'view');
+
+        if ($response) {
+            return $response;
+        }
+
+        $query = Brand::latest()->paginate(10);
+        return BrandResource::collection($query);
+    }
+
     // Create a new brand
     public function store(Request $request)
     {

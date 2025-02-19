@@ -7,7 +7,7 @@ use Illuminate\Database\Eloquent\Model;
 class SoldGroup extends Model
 {
     protected $fillable = [
-        'vendor',
+        'vendor_id',
         'client_id',
         'note',
         'store_id',

@@ -15,12 +15,14 @@ Route::group(['middleware' => ['auth:sanctum']], function () {
     Route::get('/aianal', [AiController::class, 'aisale']);
 
     Route::get('/admin/brands', [BrandController::class, 'index']);
+    Route::get('/admin/brands/all', [BrandController::class, 'all']);
     Route::get('/admin/brand/{id}', [BrandController::class, 'show']);
     Route::post('/admin/createbrand', [BrandController::class, 'store']);
     Route::post('/admin/updatebrand/{id}', [BrandController::class, 'update']);
     Route::post('/admin/deletebrand/{id}', [BrandController::class, 'destroy']);
 
     Route::get('/admin/categorys', [CategoryController::class, 'index']);
+    Route::get('/admin/categorys/all', [CategoryController::class, 'all']);
     Route::get('/admin/category/{id}', [CategoryController::class, 'show']);
     Route::post('/admin/createcategory', [CategoryController::class, 'store']);
     Route::post('/admin/updatecategory/{id}', [CategoryController::class, 'update']);
