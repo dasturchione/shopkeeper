@@ -24,7 +24,8 @@ class SaleController extends Controller
         $this->permissionService = $permissionService;
     }
 
-    public function index(){
+    public function index()
+    {
         $response = $this->permissionService->hasPermission('sale', 'add');
 
         if ($response) {
@@ -33,7 +34,8 @@ class SaleController extends Controller
 
         $search = request()->query('search');
 
-        $query = SoldGroup::query();
+        $user = Auth::user();
+        $query = SoldGroup::query()->where('store_id', $user->store_id);
 
         if ($search) {
             $query->where(function ($q) use ($search) {
@@ -42,12 +44,12 @@ class SaleController extends Controller
                     $q->orWhereDate('created_at', $date);
                 }
             })
-            ->orWhereHas('vendor', function ($q) use ($search) {
-                $q->where('name', 'like', '%' . $search . '%');
-            })
-            ->orWhereHas('client', function ($q) use ($search) {
-                $q->where('name', 'like', '%' . $search . '%');
-            });
+                ->orWhereHas('vendor', function ($q) use ($search) {
+                    $q->where('name', 'like', '%' . $search . '%');
+                })
+                ->orWhereHas('client', function ($q) use ($search) {
+                    $q->where('name', 'like', '%' . $search . '%');
+                });
         }
 
         $sold = $query->latest()->paginate(10);
@@ -139,7 +141,7 @@ class SaleController extends Controller
 
     public function edit(Request $request, $id)
     {
-        $response = $this->permissionService->hasPermission('sale', 'add');
+        $response = $this->permissionService->hasPermission('sold_goods', 'edit');
 
         if ($response) {
             return $response;
@@ -150,6 +152,8 @@ class SaleController extends Controller
                 'status'                => 'required|integer',
                 'client'                => 'required|integer',
                 'payment_type'          => 'integer',
+                'maincurrency'          => 'integer',
+                'convertcurrency'       => 'integer',
                 'discription'           => 'string',
             ]);
 
@@ -168,7 +172,7 @@ class SaleController extends Controller
             if ($s_group) {
                 // Yangilash
                 $s_group->update([
-                    'vendor_id'        => $user->id,
+                    'vendor_id'     => $user->id,
                     'client_id'     => $request->client,
                     'status'        => $request->status,
                     'store_id'      => $user->store_id,

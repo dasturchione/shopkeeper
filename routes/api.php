@@ -5,6 +5,7 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\BrandController;
 use App\Http\Controllers\CategoryController;
+use App\Http\Controllers\ClientController;
 use App\Http\Controllers\ProductController;
 use App\Http\Controllers\SaleController;
 
@@ -24,6 +25,13 @@ Route::group(['middleware' => ['auth:sanctum']], function () {
     Route::post('/admin/createcategory', [CategoryController::class, 'store']);
     Route::post('/admin/updatecategory/{id}', [CategoryController::class, 'update']);
     Route::post('/admin/deletecategory/{id}', [CategoryController::class, 'destroy']);
+
+    Route::get('/admin/clients', [ClientController::class, 'index']);
+    Route::get('/admin/clients/all', [ClientController::class, 'all']);
+    Route::get('/admin/client/{id}', [ClientController::class, 'show']);
+    Route::post('/admin/createclient', [ClientController::class, 'store']);
+    Route::post('/admin/updateclient/{id}', [ClientController::class, 'update']);
+    Route::post('/admin/deleteclient/{id}', [ClientController::class, 'destroy']);
 
     Route::get('/admin/products', [ProductController::class, 'index']);
     Route::get('/admin/product/{id}', [ProductController::class, 'show']);
