@@ -8,6 +8,7 @@ use App\Http\Controllers\CategoryController;
 use App\Http\Controllers\ClientController;
 use App\Http\Controllers\ProductController;
 use App\Http\Controllers\SaleController;
+use App\Http\Controllers\SupplierController;
 
 Route::post('/admin/login', [AuthController::class, 'loginAdmin']);
 Route::group(['middleware' => ['auth:sanctum']], function () {
@@ -32,6 +33,13 @@ Route::group(['middleware' => ['auth:sanctum']], function () {
     Route::post('/admin/createclient', [ClientController::class, 'store']);
     Route::post('/admin/updateclient/{id}', [ClientController::class, 'update']);
     Route::post('/admin/deleteclient/{id}', [ClientController::class, 'destroy']);
+
+    Route::get('/admin/suppliers', [SupplierController::class, 'index']);
+    Route::get('/admin/suppliers/all', [SupplierController::class, 'all']);
+    Route::get('/admin/supplier/{id}', [SupplierController::class, 'show']);
+    Route::post('/admin/createsupplier', [SupplierController::class, 'store']);
+    Route::post('/admin/updatesupplier/{id}', [SupplierController::class, 'update']);
+    Route::post('/admin/deletesupplier/{id}', [SupplierController::class, 'destroy']);
 
     Route::get('/admin/products', [ProductController::class, 'index']);
     Route::get('/admin/product/{id}', [ProductController::class, 'show']);
