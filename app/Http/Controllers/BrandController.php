@@ -45,7 +45,7 @@ class BrandController extends Controller
             return $response;
         }
 
-        $query = Brand::latest()->paginate(10);
+        $query = Brand::latest()->get();
         return BrandResource::collection($query);
     }
 
