@@ -6,14 +6,11 @@ use App\Http\Controllers\AuthController;
 use App\Http\Controllers\BrandController;
 use App\Http\Controllers\CategoryController;
 use App\Http\Controllers\ProductController;
-use App\Http\Controllers\AiController;
 use App\Http\Controllers\SaleController;
 
 Route::post('/admin/login', [AuthController::class, 'loginAdmin']);
 Route::group(['middleware' => ['auth:sanctum']], function () {
-
-    Route::get('/aianal', [AiController::class, 'aisale']);
-
+    
     Route::get('/admin/brands', [BrandController::class, 'index']);
     Route::get('/admin/brands/all', [BrandController::class, 'all']);
     Route::get('/admin/brand/{id}', [BrandController::class, 'show']);
