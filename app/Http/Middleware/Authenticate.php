@@ -15,12 +15,6 @@ class Authenticate
      */
     public function handle(Request $request, Closure $next): Response
     {
-        dd($request);
-        if (!$request->bearerToken()) {
-            return response()->json([
-                'error' => 'Bearer token is required.'
-            ], 401);
-        }
         return $next($request);
     }
 }

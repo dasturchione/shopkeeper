@@ -110,6 +110,8 @@ class SaleController extends Controller
                     ], 422);
                 }
 
+                $product->decrement('quantity', $item['quantity']);
+
                 SoldItem::create([
                     'product_id'    => $item['product_id'],
                     'in_price'      => $product->in_price,
@@ -119,6 +121,20 @@ class SaleController extends Controller
                     'warranty_type' => $item['warranty_type'],
                     'discount'      => $item['discount'],
                     'sold_group_id' => $s_group->id
+                ]);
+
+                $product->actions()->create([
+                    'action_type' => 'sale_product',
+                    'data' => json_encode([
+                        'product_id'    => $product->id,
+                        'quantity'      => $item['quantity'],
+                        'warranty'      => $item['warranty'],
+                        'warranty_type' => $item['warranty_type'],
+                        'discount'      => $item['discount'],
+                        'sold_group_id' => $s_group->id
+                    ]),
+                    'user_id' => $user->id,
+                    'store_id' => $user->store_id
                 ]);
             }
             DB::commit();

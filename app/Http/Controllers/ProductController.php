@@ -19,7 +19,8 @@ class ProductController extends Controller
         $this->permissionService = $permissionService;
     }
 
-    public function index(){
+    public function index()
+    {
         $response = $this->permissionService->hasPermission('product', 'view');
 
         if ($response) {
@@ -34,19 +35,19 @@ class ProductController extends Controller
         if ($search) {
             $query->where(function ($q) use ($search) {
                 $q->where('name', 'like', '%' . $search . '%');
-    
+
                 // Sanani tekshirib to‘g‘ri formatda qidirish
                 if (preg_match('/\d{4}-\d{2}-\d{2}/', $search, $match)) {
                     $date = Carbon::parse($match[0])->format('Y-m-d');
                     $q->orWhereDate('created_at', $date);
                 }
             })
-            ->orWhereHas('brand', function ($q) use ($search) {
-                $q->where('name', 'like', '%' . $search . '%');
-            })
-            ->orWhereHas('category', function ($q) use ($search) {
-                $q->where('name', 'like', '%' . $search . '%');
-            });
+                ->orWhereHas('brand', function ($q) use ($search) {
+                    $q->where('name', 'like', '%' . $search . '%');
+                })
+                ->orWhereHas('category', function ($q) use ($search) {
+                    $q->where('name', 'like', '%' . $search . '%');
+                });
         }
 
         $products = $query->latest()->paginate(10);
@@ -54,7 +55,8 @@ class ProductController extends Controller
         return ProductResource::collection($products);
     }
 
-    public function store(Request $request){
+    public function store(Request $request)
+    {
         $response = $this->permissionService->hasPermission('product', 'add');
 
         if ($response) {
@@ -99,8 +101,22 @@ class ProductController extends Controller
         ]);
 
         $product->actions()->create([
-            'action_type' => 'updated',
-            'data' => json_encode(['old_price' => 100, 'new_price' => 120])
+            'action_type' => 'add_product',
+            'data' => json_encode([
+                'brand_id'      => $request->brand_id,
+                'category_id'   => $request->category_id,
+                'supplier_id'   => $request->supplier_id,
+                'receiver_id'   => $user->id,
+                'condition'     => $request->condition,
+                'name'          => $request->name,
+                'in_price'      => $request->in_price,
+                'sale_price'    => $request->sale_price,
+                'quantity'      => $request->quantity,
+                'warranty'      => $request->warranty,
+                'warranty_type' => $request->warranty_type,
+            ]),
+            'user_id' => $user->id,
+            'store_id' => $user->store_id
         ]);
 
         return response()->json([
@@ -109,7 +125,8 @@ class ProductController extends Controller
         ]);
     }
 
-    public function update(Request $request, $id){
+    public function update(Request $request, $id)
+    {
         $response = $this->permissionService->hasPermission('product', 'edit');
 
         if ($response) {
@@ -136,11 +153,14 @@ class ProductController extends Controller
 
         $user = Auth::user();
         $product = Product::find($id);
-        if(!$product){
+        if (!$product) {
             return response()->json([
                 'error' => "Product not found"
             ], 404);
         }
+
+        $oldProduct = clone $product;
+
         $product->brand_id      = $request->brand_id;
         $product->category_id   = $request->category_id;
         $product->supplier_id   = $request->supplier_id;
@@ -159,15 +179,51 @@ class ProductController extends Controller
 
         $product->update();
 
+        $product->actions()->create([
+            'action_type' => 'edit_product',
+            'data' => json_encode([
+                'old' => [
+                    'brand_id'      => $oldProduct->brand_id,
+                    'category_id'   => $oldProduct->category_id,
+                    'supplier_id'   => $oldProduct->supplier_id,
+                    'receiver_id'   => $oldProduct->receiver_id,
+                    'condition'     => $oldProduct->condition,
+                    'name'          => $oldProduct->name,
+                    'in_price'      => $oldProduct->in_price,
+                    'sale_price'    => $oldProduct->sale_price,
+                    'quantity'      => $oldProduct->quantity,
+                    'warranty'      => $oldProduct->warranty,
+                    'warranty_type' => $oldProduct->warranty_type
+                ],
+
+                'new' => [
+                    'brand_id'      => $request->brand_id,
+                    'category_id'   => $request->category_id,
+                    'supplier_id'   => $request->supplier_id,
+                    'receiver_id'   => $user->id,
+                    'condition'     => $request->condition,
+                    'name'          => $request->name,
+                    'in_price'      => $request->in_price,
+                    'sale_price'    => $request->sale_price,
+                    'quantity'      => $request->quantity,
+                    'warranty'      => $request->warranty,
+                    'warranty_type' => $request->warranty_type,
+                ]
+            ]),
+            'user_id' => $user->id,
+            'store_id' => $user->store_id
+        ]);
+
         return response()->json([
             'message' => "Update success",
             'data'    => new ProductResource($product)
         ]);
     }
 
-    public function show($id){
+    public function show($id)
+    {
         $product = Product::find($id);
-        if(!$product){
+        if (!$product) {
             return response()->json([
                 'error' => "Product not found"
             ], 404);
@@ -176,7 +232,8 @@ class ProductController extends Controller
         return new ProductResource($product);
     }
 
-    public function destroy($id){
+    public function destroy($id)
+    {
         $response = $this->permissionService->hasPermission('product', 'delete');
 
         if ($response) {
@@ -184,7 +241,7 @@ class ProductController extends Controller
         }
 
         $product = Product::find($id);
-        if(!$product){
+        if (!$product) {
             return response()->json([
                 'error' => "Product not found"
             ], 404);
