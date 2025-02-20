@@ -16,8 +16,8 @@ class SaleGroupResource extends JsonResource
     {
         return [
             'id'            => $this->id,
-            'vendor'        => $this->vendor_info,
-            'client'        => $this->client_info,
+            'vendor'        => $this->getIdName('vendor'),
+            'client'        => $this->getIdName('client'),
             'status'        => $this->status,
             'store_id'      => $this->store_id,
             'course_id'     => $this->course_id,

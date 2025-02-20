@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\ActionController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AuthController;
@@ -50,6 +51,8 @@ Route::group(['middleware' => ['auth:sanctum']], function () {
     Route::post('/admin/sale', [SaleController::class, 'store']);
     Route::post('/admin/editsold/{id}', [SaleController::class, 'edit']);
     Route::get('/admin/soldlist', [SaleController::class, 'index']);
+
+    Route::get('/admin/action/product/{id}', [ActionController::class, 'getProductActions']);
 
     Route::post('/logout', [AuthController::class, 'logout']);
 });

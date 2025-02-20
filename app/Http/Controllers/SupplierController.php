@@ -20,7 +20,7 @@ class SupplierController extends Controller
 
     public function index()
     {
-        $response = $this->permissionService->hasPermission('category', 'view');
+        $response = $this->permissionService->hasPermission('supplier', 'view');
 
         if ($response) {
             return $response;
@@ -39,7 +39,7 @@ class SupplierController extends Controller
 
     public function all()
     {
-        $response = $this->permissionService->hasPermission('category', 'view');
+        $response = $this->permissionService->hasPermission('supplier', 'view');
 
         if ($response) {
             return $response;
@@ -51,7 +51,7 @@ class SupplierController extends Controller
 
     public function show($id)
     {
-        $response = $this->permissionService->hasPermission('client', 'view');
+        $response = $this->permissionService->hasPermission('supplier', 'view');
 
         if ($response) {
             return $response;
@@ -68,7 +68,7 @@ class SupplierController extends Controller
 
     public function store(Request $request)
     {
-        $response = $this->permissionService->hasPermission('client', 'add');
+        $response = $this->permissionService->hasPermission('supplier', 'add');
 
         if ($response) {
             return $response;
@@ -96,7 +96,7 @@ class SupplierController extends Controller
 
     public function update(Request $request, $id)
     {
-        $response = $this->permissionService->hasPermission('client', 'edit');
+        $response = $this->permissionService->hasPermission('supplier', 'edit');
 
         if ($response) {
             return $response;
@@ -133,7 +133,7 @@ class SupplierController extends Controller
 
     public function destroy($id)
     {
-        $response = $this->permissionService->hasPermission('client', 'delete');
+        $response = $this->permissionService->hasPermission('supplier', 'delete');
         if ($response) {
             return $response;
         }

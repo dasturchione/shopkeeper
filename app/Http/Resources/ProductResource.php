@@ -16,22 +16,22 @@ class ProductResource extends JsonResource
     {
         return [
             'id' => $this->id,
-            'brand' => $this->brands,
-            'category' => $this->categorys,
-            'supplier' => $this->suppliers,
-            'receiver' => $this->receivers,
+            'brand' => $this->getIdName('brand'),
+            'category' => $this->getIdName('category'),
+            'supplier' => $this->getIdName('supplier'),
+            'receiver' => $this->getIdName('user'),
             'condition' => $this->condition,
             'name' => $this->name,
-            'in_price' => $this->in_prices,
-            'sale_price' => $this->sale_prices,
+            'in_price' => $this->getPrice('in_price'),
+            'sale_price' => $this->getPrice('sale_price'),
             'quantity' => $this->quantity,
             'warranty' => $this->warranty,
             'warranty_type' => $this->warranty_type,
             'note' => $this->note,
             'store_id' => $this->store_id,
             'is_active' => $this->is_active,
-            'created_at' => $this->created_at->toDateTimeString(),
-            'updated_at' => $this->updated_at->toDateTimeString(),
+            'created_at' => $this->created_at->format('Y-m-d'),
+            'updated_at' => $this->updated_at->format('Y-m-d'),
         ];
     }
 }

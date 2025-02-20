@@ -95,6 +95,12 @@ class ProductController extends Controller
             'note'          => $request->note ? $request->note : null,
             'store_id'      => $user->store_id,
             'is_active'     => true,
+            'created_at'    => Carbon::parse($request->date)->format('Y-m-d')
+        ]);
+
+        $product->actions()->create([
+            'action_type' => 'updated',
+            'data' => json_encode(['old_price' => 100, 'new_price' => 120])
         ]);
 
         return response()->json([
@@ -148,6 +154,7 @@ class ProductController extends Controller
         $product->warranty_type = $request->warranty_type;
         $product->note          = $request->note ? $request->note : null;
         $product->store_id      = $user->store_id;
+        $product->created_at    = Carbon::parse($request->date)->format('Y-m-d');
         $product->is_active     = true;
 
         $product->update();
@@ -167,5 +174,26 @@ class ProductController extends Controller
         }
 
         return new ProductResource($product);
+    }
+
+    public function destroy($id){
+        $response = $this->permissionService->hasPermission('product', 'delete');
+
+        if ($response) {
+            return $response;
+        }
+
+        $product = Product::find($id);
+        if(!$product){
+            return response()->json([
+                'error' => "Product not found"
+            ], 404);
+        }
+
+        $product->delete();
+
+        return response()->json([
+            'message' => "Delete success"
+        ]);
     }
 }
