@@ -93,9 +93,21 @@ class ClientController extends Controller
         $user = Auth::user();
         $client = Client::create([
             'name'      => $request->name,
+            'surname'   => $request->surname,
             'phone'     => $request->phone,
             'note'      => $request->note ? $request->note : null,
             'store_id'  => $user->store_id,
+        ]);
+        $client->actions()->create([
+            'action_type' => 'add_client',
+            'data' => json_encode([
+                'name' => $client->name,
+                'surname' => $client->surname,
+                'phone' => $client->phone,
+                'note' => $client->note,
+            ]),
+            'user_id' => $user->id,
+            'store_id' => $user->store_id,
         ]);
         return response()->json($client, 201);
     }
@@ -119,10 +131,12 @@ class ClientController extends Controller
 
         $user = Auth::user();
         $client = Client::where('store_id', $user->store_id)->find($id);
+        $oldClient = clone $client;
 
         if ($client) {
             $client->update([
                 'name'      => $request->name,
+                'surname'   => $request->surname,
                 'phone'     => $request->phone,
                 'note'      => $request->note ? $request->note : null,
                 'store_id'  => $user->store_id,
@@ -133,6 +147,26 @@ class ClientController extends Controller
                 'message' => 'Client not found!'
             ], 404);
         }
+
+        $client->actions()->create([
+            'action_type' => 'edit_client',
+            'data' => json_encode([
+                'old' => [
+                    'name' => $oldClient->name,
+                    'surname' => $oldClient->surname,
+                    'phone' => $oldClient->phone,
+                    'note' => $oldClient->note,
+                ],
+                'new' => [
+                    'name' => $client->name,
+                    'surname' => $client->surname,
+                    'phone' => $client->phone,
+                    'note' => $client->note,
+                ]
+            ]),
+            'user_id' => $user->id,
+            'store_id' => $user->store_id,
+        ]);
         return response()->json($client, 201);
     }
 
@@ -147,7 +181,7 @@ class ClientController extends Controller
             $user = Auth::user();
             $category = Client::where('store_id', $user->store_id)->find($id);
 
-            if(!$category){
+            if (!$category) {
                 return response()->json([
                     'message' => 'Client not found'
                 ], 404);

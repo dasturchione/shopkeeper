@@ -9,6 +9,7 @@ use App\Http\Controllers\CategoryController;
 use App\Http\Controllers\ClientController;
 use App\Http\Controllers\ProductController;
 use App\Http\Controllers\SaleController;
+use App\Http\Controllers\SoldController;
 use App\Http\Controllers\SupplierController;
 
 Route::post('/admin/login', [AuthController::class, 'loginAdmin']);
@@ -49,8 +50,9 @@ Route::group(['middleware' => ['auth:sanctum']], function () {
     Route::post('/admin/deleteproduct/{id}', [ProductController::class, 'destroy']);
 
     Route::post('/admin/sale', [SaleController::class, 'store']);
-    Route::post('/admin/editsold/{id}', [SaleController::class, 'edit']);
+    Route::post('/admin/editsold/{id}', [SoldController::class, 'edit']);
     Route::get('/admin/soldlist', [SaleController::class, 'index']);
+    Route::get('/admin/solditems/{id}', [SoldController::class, 'soldItems']);
 
     Route::get('/admin/action/product/{id}', [ActionController::class, 'getProductActions']);
 

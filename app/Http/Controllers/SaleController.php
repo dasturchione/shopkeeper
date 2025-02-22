@@ -39,17 +39,23 @@ class SaleController extends Controller
 
         if ($search) {
             $query->where(function ($q) use ($search) {
+                // Sana formatini tekshirish va qidirish
                 if (preg_match('/\d{4}-\d{2}-\d{2}/', $search, $match)) {
                     $date = Carbon::parse($match[0])->format('Y-m-d');
                     $q->orWhereDate('created_at', $date);
                 }
+        
+                // ID bo‘yicha qidirish (raqam bo‘lsa)
+                if (is_numeric($search)) {
+                    $q->orWhere('id', $search);
+                }
             })
-                ->orWhereHas('vendor', function ($q) use ($search) {
-                    $q->where('name', 'like', '%' . $search . '%');
-                })
-                ->orWhereHas('client', function ($q) use ($search) {
-                    $q->where('name', 'like', '%' . $search . '%');
-                });
+            ->orWhereHas('vendor', function ($q) use ($search) {
+                $q->where('name', 'like', '%' . $search . '%');
+            })
+            ->orWhereHas('client', function ($q) use ($search) {
+                $q->where('name', 'like', '%' . $search . '%');
+            });
         }
 
         $sold = $query->latest()->paginate(10);
@@ -91,7 +97,7 @@ class SaleController extends Controller
             $shop = Store::where('id', $user->store_id)->first();
 
             $s_group = SoldGroup::create([
-                'vendor_id'        => $user->id,
+                'vendor_id'     => $user->id,
                 'client_id'     => $request->client,
                 'status'        => $request->status,
                 'store_id'      => $user->store_id,
@@ -155,68 +161,4 @@ class SaleController extends Controller
         }
     }
 
-    public function edit(Request $request, $id)
-    {
-        $response = $this->permissionService->hasPermission('sold_goods', 'edit');
-
-        if ($response) {
-            return $response;
-        }
-
-        try {
-            $validator = Validator::make($request->all(), [
-                'status'                => 'required|integer',
-                'client'                => 'required|integer',
-                'payment_type'          => 'integer',
-                'maincurrency'          => 'integer',
-                'convertcurrency'       => 'integer',
-                'discription'           => 'string',
-            ]);
-
-            if ($validator->fails()) {
-                return response()->json([
-                    'status' => 'error',
-                    'errors' => $validator->errors()
-                ], 422);
-            }
-
-            $user = Auth::user();
-            $shop = Store::where('id', $user->store_id)->first();
-
-            $s_group = SoldGroup::find($id);
-
-            if ($s_group) {
-                // Yangilash
-                $s_group->update([
-                    'vendor_id'     => $user->id,
-                    'client_id'     => $request->client,
-                    'status'        => $request->status,
-                    'store_id'      => $user->store_id,
-                    'course_id'     => $shop->course_id,
-                    'payment_type'  => $request->payment_type,
-                    'note'          => $request->discription
-                ]);
-
-                return response()->json([
-                    'status' => 'success',
-                    'message' => 'SoldGroup updated successfully!',
-                    'data' => $s_group
-                ]);
-            } else {
-                return response()->json([
-                    'status' => 'error',
-                    'message' => 'SoldGroup not found!'
-                ], 404);
-            }
-        } catch (\Exception $e) {
-            Log::error('Error occurred while creating order', [
-                'request' => $request->all(),
-                'exception' => $e->getMessage(),
-            ]);
-            return response()->json([
-                'status' => 'error',
-                'message' => $e->getMessage()
-            ], 500);
-        }
-    }
 }

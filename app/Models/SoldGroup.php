@@ -19,6 +19,13 @@ class SoldGroup extends Model
         'course_id'
     ];
 
+    protected function casts(): array
+    {
+        return [
+            'status' => 'boolean',
+        ];
+    }
+
     public function items()
     {
         return $this->hasMany(SoldItem::class, 'sold_group_id');
@@ -34,6 +41,16 @@ class SoldGroup extends Model
         return $this->belongsTo(Client::class, 'client_id');
     }
 
+    public function store()
+    {
+        return $this->belongsTo(Store::class, 'store_id');
+    }
+
+    public function course()
+    {
+        return $this->belongsTo(Course::class, 'course_id');
+    }
+
     public function getIdName($relation)
     {
         return [
@@ -44,6 +61,6 @@ class SoldGroup extends Model
 
     public function getItemsInfoAttribute()
     {
-        return CalculatorService::calculateItemsInfo($this->items);
+        return CalculatorService::calculateItemsInfo($this->items, $this->maincurrency, $this->convertcurrency, $this->course->rate ?? 1);
     }
 }

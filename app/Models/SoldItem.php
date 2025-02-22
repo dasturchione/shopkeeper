@@ -16,4 +16,9 @@ class SoldItem extends Model
         'warranty_type',
         'sold_group_id'
     ];
+
+    public function product()
+    {
+        return $this->belongsTo(Product::class, 'product_id');
+    }
 }
