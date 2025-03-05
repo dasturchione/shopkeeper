@@ -15,7 +15,7 @@ use App\Http\Controllers\SupplierController;
 
 Route::post('/admin/login', [AuthController::class, 'loginAdmin']);
 Route::group(['middleware' => ['auth:sanctum']], function () {
-    
+
     Route::get('/admin/brands', [BrandController::class, 'index']);
     Route::get('/admin/brands/all', [BrandController::class, 'all']);
     Route::get('/admin/brand/{id}', [BrandController::class, 'show']);
@@ -53,6 +53,7 @@ Route::group(['middleware' => ['auth:sanctum']], function () {
 
     Route::post('/admin/sale', [SaleController::class, 'store']);
     Route::post('/admin/editsold/{id}', [SoldController::class, 'edit']);
+    Route::post('/admin/addproductsold/{id}', [SoldController::class, 'addProduct']);
     Route::get('/admin/soldlist', [SaleController::class, 'index']);
     Route::get('/admin/solditems/{id}', [SoldController::class, 'soldItems']);
     Route::post('/admin/productback', [SoldController::class, 'backProduct']);
