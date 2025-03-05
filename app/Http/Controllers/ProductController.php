@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Product;
 use Illuminate\Http\Request;
 use App\Services\PermissionService;
+use App\Services\CalculatorService;
 use Illuminate\Support\Facades\Auth;
 use App\Http\Resources\ProductResource;
 use Illuminate\Support\Facades\Validator;
@@ -12,10 +13,13 @@ use Carbon\Carbon;
 
 class ProductController extends Controller
 {
+
+    protected $calculator;
     protected $permissionService;
 
-    public function __construct(PermissionService $permissionService)
+    public function __construct(CalculatorService $calculator, PermissionService $permissionService)
     {
+        $this->calculator = $calculator;
         $this->permissionService = $permissionService;
     }
 
@@ -27,30 +31,42 @@ class ProductController extends Controller
             return $response;
         }
 
-        // Qidiruv uchun 'name' parametri
         $search = request()->query('search');
 
         $query = Product::query();
-
+        
         if ($search) {
-            $query->where(function ($q) use ($search) {
-                $q->where('name', 'like', '%' . $search . '%');
+            $keywords = explode(' ', trim($search)); // Qidiruv matnini so‘zlarga ajratish
+        
+            $query->where(function ($q) use ($keywords) {
+                $hasCategory = false;
+                $hasName = false;
+        
+                foreach ($keywords as $word) {
+                    // Kategoriya nomida qidirish
+                    $q->orWhere('name', 'like', '%' . $word . '%');
+                    $hasName = true;
 
-                // Sanani tekshirib to‘g‘ri formatda qidirish
-                if (preg_match('/\d{4}-\d{2}-\d{2}/', $search, $match)) {
-                    $date = Carbon::parse($match[0])->format('Y-m-d');
-                    $q->orWhereDate('created_at', $date);
+                    $q->orWhereHas('category', function ($subQuery) use ($word, &$hasCategory) {
+                        $subQuery->where('name', 'like', '%' . $word . '%');
+                        $hasCategory = true;
+                    });
+                    
+                    // Sana formatiga mos kelishini tekshirish
+                    if (preg_match('/\d{4}-\d{2}-\d{2}/', $word)) {
+                        $date = Carbon::parse($word)->format('Y-m-d');
+                        $q->orWhereDate('created_at', $date);
+                    }
                 }
-            })
-                ->orWhereHas('brand', function ($q) use ($search) {
-                    $q->where('name', 'like', '%' . $search . '%');
-                })
-                ->orWhereHas('category', function ($q) use ($search) {
-                    $q->where('name', 'like', '%' . $search . '%');
-                });
+        
+                // Faqat kategoriya bo'yicha natija chiqishining oldini olish
+                if ($hasCategory && !$hasName) {
+                    $q->where('name', 'like', '%%'); // Name bo‘yicha ham hech bo‘lmaganda bir shart qo‘yish kerak
+                }
+            });
         }
 
-        $products = $query->latest()->paginate(10);
+        $products = $query->where('quantity', '>', 0)->where('is_active', true)->latest()->paginate(10);
 
         return ProductResource::collection($products);
     }
@@ -232,6 +248,18 @@ class ProductController extends Controller
         return new ProductResource($product);
     }
 
+    public function showBarcode($id)
+    {
+        $product = Product::where('barcode',$id)->first();
+        if (!$product) {
+            return response()->json([
+                'error' => "Product not found"
+            ], 404);
+        }
+
+        return new ProductResource($product);
+    }
+
     public function destroy($id)
     {
         $response = $this->permissionService->hasPermission('product', 'delete');
@@ -252,5 +280,24 @@ class ProductController extends Controller
         return response()->json([
             'message' => "Delete success"
         ]);
+    }
+
+    public function barcodegen(){
+        $barcode = $this->calculator->generateUniqueBarcode();
+
+        return response()->json(['barcode' => $barcode]);
+    }
+
+    public function addBarcodesToProducts()
+    {
+        $products = Product::whereNull('barcode')->get();
+
+        foreach ($products as $product) {
+            $product->update([
+                'barcode' => $this->calculator->generateUniqueBarcode()
+            ]);
+        }
+
+        return "Barcha mahsulotlarga barcode qo‘shildi!";
     }
 }

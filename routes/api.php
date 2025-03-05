@@ -7,6 +7,7 @@ use App\Http\Controllers\AuthController;
 use App\Http\Controllers\BrandController;
 use App\Http\Controllers\CategoryController;
 use App\Http\Controllers\ClientController;
+use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\ProductController;
 use App\Http\Controllers\SaleController;
 use App\Http\Controllers\SoldController;
@@ -45,6 +46,7 @@ Route::group(['middleware' => ['auth:sanctum']], function () {
 
     Route::get('/admin/products', [ProductController::class, 'index']);
     Route::get('/admin/product/{id}', [ProductController::class, 'show']);
+    Route::get('/admin/productbybarcode/{id}', [ProductController::class, 'showBarcode']);
     Route::post('/admin/createproduct', [ProductController::class, 'store']);
     Route::post('/admin/updateproduct/{id}', [ProductController::class, 'update']);
     Route::post('/admin/deleteproduct/{id}', [ProductController::class, 'destroy']);
@@ -53,8 +55,13 @@ Route::group(['middleware' => ['auth:sanctum']], function () {
     Route::post('/admin/editsold/{id}', [SoldController::class, 'edit']);
     Route::get('/admin/soldlist', [SaleController::class, 'index']);
     Route::get('/admin/solditems/{id}', [SoldController::class, 'soldItems']);
+    Route::post('/admin/productback', [SoldController::class, 'backProduct']);
+    Route::get('/barcode', [ProductController::class, 'addBarcodesToProducts']);
 
     Route::get('/admin/action/product/{id}', [ActionController::class, 'getProductActions']);
+
+    Route::get('/admin/dashboard/byday', [DashboardController::class, 'getOrdersByDay']);
+    Route::get('/admin/dashboard/widget', [DashboardController::class, 'getWidgetInfo']);
 
     Route::post('/logout', [AuthController::class, 'logout']);
 });

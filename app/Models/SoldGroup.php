@@ -16,13 +16,15 @@ class SoldGroup extends Model
         'payment_type',
         'maincurrency',
         'convertcurrency',
-        'course_id'
+        'course_id',
+        'is_real'
     ];
 
     protected function casts(): array
     {
         return [
             'status' => 'boolean',
+            'is_real' => 'boolean',
         ];
     }
 

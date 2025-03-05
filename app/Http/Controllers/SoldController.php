@@ -3,9 +3,12 @@
 namespace App\Http\Controllers;
 
 use App\Http\Resources\SoldItemResource;
+use App\Models\Product;
 use App\Models\SoldGroup;
+use App\Models\SoldItem;
 use App\Models\Store;
 use App\Services\PermissionService;
+use App\Services\CalculatorService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
@@ -13,10 +16,12 @@ use Illuminate\Support\Facades\Validator;
 
 class SoldController extends Controller
 {
+    protected $calculator;
     protected $permissionService;
 
-    public function __construct(PermissionService $permissionService)
+    public function __construct(CalculatorService $calculator, PermissionService $permissionService)
     {
+        $this->calculator = $calculator;
         $this->permissionService = $permissionService;
     }
 
@@ -30,13 +35,11 @@ class SoldController extends Controller
 
         try {
             $validator = Validator::make($request->all(), [
-                'status'                => 'required|integer',
-                'client'                => 'required|integer',
-                'payment_type'          => 'integer',
-                'maincurrency'          => 'integer',
-                'convertcurrency'       => 'integer',
-                'discription'           => 'string',
-            ]);
+                'payment_status'  => 'required|boolean',
+                'payment_type'    => 'nullable|integer|required_if:payment_status,1',
+                'convert'        => 'integer',
+                'discription'    => 'string',
+            ]);            
 
             if ($validator->fails()) {
                 return response()->json([
@@ -53,14 +56,14 @@ class SoldController extends Controller
             if ($s_group) {
                 // Yangilash
                 $s_group->update([
-                    'vendor_id'     => $user->id,
-                    'client_id'     => $request->client,
-                    'status'        => $request->status,
-                    'store_id'      => $user->store_id,
-                    'course_id'     => $shop->course_id,
-                    'payment_type'  => $request->payment_type,
-                    'note'          => $request->discription
-                ]);
+                    'vendor_id'        => $user->id,
+                    'client_id'        => $request->client ? $request->client : $s_group->client_id,
+                    'status'           => $request->payment_status,
+                    'payment_type'     => $request->payment_type,
+                    'maincurrency'     => in_array($request->payment_type, [1, 3]) ? 0 : $request->main,
+                    'convertcurrency'  => $request->payment_type == 2 ? 0 : $request->convert,
+                    'note'             => $request->description
+                ]);                
 
                 return response()->json([
                     'status' => 'success',
@@ -85,7 +88,8 @@ class SoldController extends Controller
         }
     }
 
-    public function soldItems($id){
+    public function soldItems($id)
+    {
         $response = $this->permissionService->hasPermission('sold_goods', 'view');
 
         if ($response) {
@@ -102,5 +106,94 @@ class SoldController extends Controller
         }
 
         return new SoldItemResource($soldGroup);
+    }
+
+    public function backProduct(Request $request)
+    {
+        $response = $this->permissionService->hasPermission('sold_goods', 'edit');
+
+        if ($response) {
+            return $response;
+        }
+
+        $user = Auth::user();
+
+        $item = SoldItem::find($request->id);
+        if ($item->product->condition == $request->condition) {
+            $item->product->increment('quantity', $request->quantity);
+            $item->decrement('quantity', $request->quantity);
+
+            $item->product->actions()->create([
+                'action_type' => 'back_product',
+                'data' => json_encode([
+                    'brand_id'      => $item->product->brand_id,
+                    'category_id'   => $item->product->category_id,
+                    'supplier_id'   => $item->product->supplier_id,
+                    'receiver_id'   => $user->id,
+                    'condition'     => $request->condition,
+                    'name'          => $item->product->name,
+                    'in_price'      => $item->product->in_price,
+                    'sale_price'    => $item->product->sale_price,
+                    'quantity'      => $request->quantity,
+                    'warranty'      => $item->product->warranty,
+                    'warranty_type' => $item->product->warranty_type,
+                    'from'          => $item->sold_group_id,
+                ]),
+                'user_id' => $user->id,
+                'store_id' => $user->store_id
+            ]);
+
+            if ($item->quantity == 0) {
+                $item->delete();
+            }
+        } else {
+            $product = Product::create([
+                'brand_id'      => $item->product->brand_id,
+                'category_id'   => $item->product->category_id,
+                'supplier_id'   => $item->product->supplier_id,
+                'receiver_id'   => $user->id,
+                'barcode'       => $this->calculator->generateUniqueBarcode(),
+                'condition'     => $request->condition,
+                'name'          => $item->product->name,
+                'in_price'      => $request->in_price,
+                'sale_price'    => $request->sale_price,
+                'quantity'      => $request->quantity,
+                'warranty'      => $request->warranty,
+                'warranty_type' => $request->warranty_type,
+                'note'          => $request->note ? $request->note : null,
+                'store_id'      => $user->store_id,
+                'is_active'     => true,
+            ]);
+
+            $product->actions()->create([
+                'action_type' => 'back_add_product',
+                'data' => json_encode([
+                    'brand_id'      => $item->product->brand_id,
+                    'category_id'   => $item->product->category_id,
+                    'supplier_id'   => $item->product->supplier_id,
+                    'receiver_id'   => $user->id,
+                    'condition'     => $request->condition,
+                    'name'          => $item->product->name,
+                    'in_price'      => $request->in_price,
+                    'sale_price'    => $request->sale_price,
+                    'quantity'      => $request->quantity,
+                    'warranty'      => $request->warranty,
+                    'warranty_type' => $request->warranty_type,
+                    'from'          => $item->sold_group_id,
+                ]),
+                'user_id' => $user->id,
+                'store_id' => $user->store_id
+            ]);
+
+            $item->decrement('quantity', $request->quantity);
+            if ($item->quantity == 0) {
+                $item->delete();
+            }
+        }
+
+        return response()->json([
+            'status' => 'success',
+            'message' => 'Product returned successfully!'
+        ]);
     }
 }

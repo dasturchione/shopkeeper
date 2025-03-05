@@ -26,7 +26,7 @@ class SaleController extends Controller
 
     public function index()
     {
-        $response = $this->permissionService->hasPermission('sale', 'add');
+        $response = $this->permissionService->hasPermission('sold', 'view');
 
         if ($response) {
             return $response;
@@ -74,16 +74,16 @@ class SaleController extends Controller
         try {
             // Validatsiya qilish
             $validator = Validator::make($request->all(), [
-                'status'                => 'required|integer',
-                'client'                => 'required|integer',
-                'payment_type'          => 'integer',
-                'discription'           => 'string',
-                'items'                 => 'required|array',
-                'items.*.product_id'    => 'required',
-                'items.*.quantity'      => 'required|integer|min:1',
-                'items.*.discount'      => 'required',
-                'items.*.warranty'      => 'required',
-                'items.*.warranty_type' => 'required'
+                'payment_status'       => 'required|integer',
+                'client'               => 'required|integer',
+                'payment_type'         => 'integer',
+                'discription'          => 'string',
+                'cart'                 => 'required|array',
+                'cart.*.product_id'    => 'required',
+                'cart.*.quantity'      => 'required|integer|min:1',
+                'cart.*.discount'      => 'required',
+                'cart.*.warranty'      => 'required',
+                'cart.*.warranty_type' => 'required'
             ]);
 
             if ($validator->fails()) {
@@ -99,14 +99,17 @@ class SaleController extends Controller
             $s_group = SoldGroup::create([
                 'vendor_id'     => $user->id,
                 'client_id'     => $request->client,
-                'status'        => $request->status,
+                'status'        => $request->payment_status,
                 'store_id'      => $user->store_id,
                 'course_id'     => $shop->course_id,
+                'maincurrency' => $request->main_currency ? $request->main_currency : null,
+                'convertcurrency' => $request->convert_currency ? $request->convert_currency : null,
                 'payment_type'  => $request->payment_type,
+                'is_real'       => $request->is_real,
                 'note'          => $request->discription
             ]);
 
-            foreach ($request->items as $item) {
+            foreach ($request->cart as $item) {
                 $product = Product::find($item['product_id']);
                 if (!$product) {
                     DB::rollBack();

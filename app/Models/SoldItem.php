@@ -21,4 +21,8 @@ class SoldItem extends Model
     {
         return $this->belongsTo(Product::class, 'product_id');
     }
+
+    public function soldGroup(){
+        return $this->belongsTo(SoldGroup::class, 'sold_group_id');
+    }
 }

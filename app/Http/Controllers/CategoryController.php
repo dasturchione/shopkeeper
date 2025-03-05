@@ -45,7 +45,7 @@ class CategoryController extends Controller
             return $response;
         }
 
-        $query = Category::latest()->paginate(10);
+        $query = Category::latest()->get();
         return BrandResource::collection($query);
     }
 
