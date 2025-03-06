@@ -34,14 +34,14 @@ class ProductController extends Controller
         $search = request()->query('search');
 
         $query = Product::query();
-        
+
         if ($search) {
             $keywords = explode(' ', trim($search)); // Qidiruv matnini so‘zlarga ajratish
-        
+
             $query->where(function ($q) use ($keywords) {
                 $hasCategory = false;
                 $hasName = false;
-        
+
                 foreach ($keywords as $word) {
                     // Kategoriya nomida qidirish
                     $q->orWhere('name', 'like', '%' . $word . '%');
@@ -51,14 +51,14 @@ class ProductController extends Controller
                         $subQuery->where('name', 'like', '%' . $word . '%');
                         $hasCategory = true;
                     });
-                    
+
                     // Sana formatiga mos kelishini tekshirish
                     if (preg_match('/\d{4}-\d{2}-\d{2}/', $word)) {
                         $date = Carbon::parse($word)->format('Y-m-d');
                         $q->orWhereDate('created_at', $date);
                     }
                 }
-        
+
                 // Faqat kategoriya bo'yicha natija chiqishining oldini olish
                 if ($hasCategory && !$hasName) {
                     $q->where('name', 'like', '%%'); // Name bo‘yicha ham hech bo‘lmaganda bir shart qo‘yish kerak
@@ -103,6 +103,7 @@ class ProductController extends Controller
             'category_id'   => $request->category_id,
             'supplier_id'   => $request->supplier_id,
             'receiver_id'   => $user->id,
+            'barcode'       => $this->calculator->generateUniqueBarcode(),
             'condition'     => $request->condition,
             'name'          => $request->name,
             'in_price'      => $request->in_price,

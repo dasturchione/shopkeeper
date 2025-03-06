@@ -21,6 +21,7 @@ class ProductResource extends JsonResource
             'supplier' => $this->getIdName('supplier'),
             'receiver' => $this->getIdName('user'),
             'condition' => $this->condition,
+            'barcode'   => $this->barcode,
             'name' => $this->name,
             'in_price' => $this->getPrice('in_price'),
             'sale_price' => $this->getPrice('sale_price'),
