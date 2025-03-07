@@ -66,7 +66,7 @@ class DashboardController extends Controller
                     ->where('status', true)
                     ->where('store_id', $user->store_id);
             })
-                ->sum(DB::raw('(in_price * quantity) - COALESCE(discount, 0)'));
+                ->sum(DB::raw('(in_price * quantity)'));
 
             $ordersCount['unpaid'][] = SoldItem::whereHas('soldGroup', function ($query) use ($formattedDate, $user) {
                 $query->whereDate('created_at', $formattedDate)
