@@ -12,6 +12,7 @@ use App\Http\Controllers\ProductController;
 use App\Http\Controllers\SaleController;
 use App\Http\Controllers\SoldController;
 use App\Http\Controllers\SupplierController;
+use App\Http\Controllers\UserController;
 
 Route::post('/admin/login', [AuthController::class, 'loginAdmin']);
 Route::group(['middleware' => ['auth:sanctum']], function () {
@@ -58,6 +59,11 @@ Route::group(['middleware' => ['auth:sanctum']], function () {
     Route::get('/admin/solditems/{id}', [SoldController::class, 'soldItems']);
     Route::post('/admin/productback', [SoldController::class, 'backProduct']);
     Route::get('/barcode', [ProductController::class, 'addBarcodesToProducts']);
+
+    Route::get('admin/users', [UserController::class, 'index']);
+    Route::get('admin/user/{id}', [UserController::class, 'show']);
+    Route::post('admin/adduser', [UserController::class, 'store']);
+    Route::post('admin/edituser/{id}', [UserController::class, 'edit']);
 
     Route::get('/admin/action/product/{id}', [ActionController::class, 'getProductActions']);
 

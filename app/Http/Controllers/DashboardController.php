@@ -13,14 +13,15 @@ use Illuminate\Support\Facades\DB;
 class DashboardController extends Controller
 {
 
-    public function getWidgetInfo(){
+    public function getWidgetInfo()
+    {
         $user = Auth::user();
         $products = Product::where('store_id', $user->store_id)
-        ->where('is_active', true)->sum('quantity');
+            ->where('is_active', true)->sum('quantity');
 
-        $soldGroupReal = SoldItem::whereHas('soldGroup', function($query) use ($user) {
+        $soldGroupReal = SoldItem::whereHas('soldGroup', function ($query) use ($user) {
             $query->where('is_real', true)
-                  ->where('store_id', $user->store_id);
+                ->where('store_id', $user->store_id);
         })->sum('quantity');
 
         return response()->json([
@@ -54,6 +55,12 @@ class DashboardController extends Controller
 
         foreach ($dates as $date) {
             $formattedDate = Carbon::createFromFormat('d-m', $date)->format('Y-m-d');
+            $ordersCount['total_income_cash_register'][] = SoldGroup::whereDate('sold_groups.created_at', $formattedDate)
+                ->where('sold_groups.status', true)
+                ->where('sold_groups.store_id', $user->store_id)
+                ->join('courses', 'sold_groups.course_id', '=', 'courses.id')
+                ->sum(DB::raw('(COALESCE(sold_groups.convertcurrency, 0) / COALESCE(courses.rate, 1)) + COALESCE(sold_groups.maincurrency, 0)'));
+
             $ordersCount['paid'][] = SoldItem::whereHas('soldGroup', function ($query) use ($formattedDate, $user) {
                 $query->whereDate('created_at', $formattedDate)
                     ->where('status', true)
@@ -79,8 +86,10 @@ class DashboardController extends Controller
         return response()->json([
             'dates' => $days,
             'total_income' => array_sum($ordersCount['paid']),
+            'total_income_cash_register' => array_sum($ordersCount['total_income_cash_register']),
             'total_expenses' => array_sum($ordersCount['expenses']),
             'total_profit' => array_sum($ordersCount['paid']) - array_sum($ordersCount['expenses']),
+            'total_profit_cash_register' => array_sum($ordersCount['total_income_cash_register']) - array_sum($ordersCount['expenses']),
             'total_unpaid' => array_sum($ordersCount['unpaid']),
             'series' => [
                 [

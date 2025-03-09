@@ -33,6 +33,7 @@ class AuthController extends Controller
             'token_type' => 'Bearer',
             'role'       => $user->role->name,
             'name'       => $user->name,
+            'image_path'    => $user->image_path ? url('storage/' . $user->image_path) : url('storage/user_images/user_image.png'),
             'permissions' => $user->permissions,
         ]);
     }
