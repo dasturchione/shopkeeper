@@ -90,7 +90,11 @@ class DashboardController extends Controller
             'total_expenses' => array_sum($ordersCount['expenses']),
             'total_profit' => array_sum($ordersCount['paid']) - array_sum($ordersCount['expenses']),
             'total_profit_cash_register' => array_sum($ordersCount['total_income_cash_register']) - array_sum($ordersCount['expenses']),
-            'unplanned_profit'  => (array_sum($ordersCount['paid']) - array_sum($ordersCount['expenses'])) - (array_sum($ordersCount['total_income_cash_register']) - array_sum($ordersCount['expenses'])),
+            'unplanned_profit' => max(
+                0,
+                (array_sum($ordersCount['total_income_cash_register']) - array_sum($ordersCount['expenses'])) -
+                    (array_sum($ordersCount['paid']) - array_sum($ordersCount['expenses']))
+            ),
             'total_unpaid' => array_sum($ordersCount['unpaid']),
             'series' => [
                 [
