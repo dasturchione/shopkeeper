@@ -120,4 +120,82 @@ class DashboardController extends Controller
             "filter" => $soldMonths
         ]);
     }
+
+    public function getOrdersByYear(Request $request)
+    {
+        $user = Auth::user();
+        $currentYear = $request->query('filter', Carbon::now()->format('Y')); // Yilni olish
+
+        $months = [];
+        for ($month = 1; $month <= 12; $month++) {
+            $months[] = Carbon::create($currentYear, $month, 1)->format('M'); // Yan, Fev, Mart...
+        }
+
+        $ordersCount = [
+            'paid' => [],
+            'unpaid' => [],
+            'expenses' => [],
+            'total_income_cash_register' => []
+        ];
+
+        for ($month = 1; $month <= 12; $month++) {
+            $formattedMonth = Carbon::create($currentYear, $month, 1)->format('Y-m');
+
+            $ordersCount['total_income_cash_register'][] = SoldGroup::whereYear('sold_groups.created_at', $currentYear)
+                ->whereMonth('sold_groups.created_at', $month)
+                ->where('sold_groups.status', true)
+                ->where('sold_groups.store_id', $user->store_id)
+                ->join('courses', 'sold_groups.course_id', '=', 'courses.id')
+                ->sum(DB::raw('(COALESCE(sold_groups.convertcurrency, 0) / COALESCE(courses.rate, 1)) + COALESCE(sold_groups.maincurrency, 0)'));
+
+            $ordersCount['paid'][] = SoldItem::whereHas('soldGroup', function ($query) use ($currentYear, $month, $user) {
+                $query->whereYear('created_at', $currentYear)
+                    ->whereMonth('created_at', $month)
+                    ->where('status', true)
+                    ->where('store_id', $user->store_id);
+            })
+                ->sum(DB::raw('(sale_price * quantity) - COALESCE(discount, 0)'));
+
+            $ordersCount['expenses'][] = SoldItem::whereHas('soldGroup', function ($query) use ($currentYear, $month, $user) {
+                $query->whereYear('created_at', $currentYear)
+                    ->whereMonth('created_at', $month)
+                    ->where('status', true)
+                    ->where('store_id', $user->store_id);
+            })
+                ->sum(DB::raw('(in_price * quantity)'));
+
+            $ordersCount['unpaid'][] = SoldItem::whereHas('soldGroup', function ($query) use ($currentYear, $month, $user) {
+                $query->whereYear('created_at', $currentYear)
+                    ->whereMonth('created_at', $month)
+                    ->where('status', false)
+                    ->where('store_id', $user->store_id);
+            })
+                ->sum(DB::raw('(sale_price * quantity) - COALESCE(discount, 0)'));
+        }
+
+        return response()->json([
+            'months' => $months,
+            'total_income' => array_sum($ordersCount['paid']),
+            'total_income_cash_register' => array_sum($ordersCount['total_income_cash_register']),
+            'total_expenses' => array_sum($ordersCount['expenses']),
+            'total_profit' => array_sum($ordersCount['paid']) - array_sum($ordersCount['expenses']),
+            'total_profit_cash_register' => array_sum($ordersCount['total_income_cash_register']) - array_sum($ordersCount['expenses']),
+            'unplanned_profit' => max(
+                0,
+                (array_sum($ordersCount['total_income_cash_register']) - array_sum($ordersCount['expenses'])) -
+                    (array_sum($ordersCount['paid']) - array_sum($ordersCount['expenses']))
+            ),
+            'total_unpaid' => array_sum($ordersCount['unpaid']),
+            'series' => [
+                [
+                    'name' => 'paid',
+                    'data' => $ordersCount['paid']
+                ],
+                [
+                    'name' => 'un_paid',
+                    'data' => $ordersCount['unpaid']
+                ]
+            ],
+        ]);
+    }
 }

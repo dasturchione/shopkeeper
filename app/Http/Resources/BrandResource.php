@@ -20,8 +20,8 @@ class BrandResource extends JsonResource
             'note' => $this->note,
             'store_id' => $this->store_id,
             'is_active' => $this->is_active,
-            'created_at' => $this->created_at->toDateTimeString(),
-            'updated_at' => $this->updated_at->toDateTimeString(),
+            'created_at' => $this->created_at->format('d-m-Y H:i:s'),
+            'updated_at' => $this->updated_at->format('d-m-Y H:i:s'),
         ];
     }
 }

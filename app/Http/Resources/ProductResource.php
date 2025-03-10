@@ -31,8 +31,8 @@ class ProductResource extends JsonResource
             'note' => $this->note,
             'store_id' => $this->store_id,
             'is_active' => $this->is_active,
-            'created_at' => $this->created_at->format('Y-m-d'),
-            'updated_at' => $this->updated_at->format('Y-m-d'),
+            'created_at' => $this->created_at->format('d-m-Y'),
+            'updated_at' => $this->updated_at->format('d-m-Y'),
         ];
     }
 }

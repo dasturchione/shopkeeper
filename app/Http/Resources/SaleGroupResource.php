@@ -25,8 +25,8 @@ class SaleGroupResource extends JsonResource
             'payment_type'  => $this->payment_type,
             'note'          => $this->note,
             'items_info'    => $this->items_info,
-            'created_at'    => $this->created_at->toDateTimeString(),
-            'updated_at'    => $this->updated_at->toDateTimeString(),
+            'created_at'    => $this->created_at->format('d-m-Y'),
+            'updated_at'    => $this->updated_at->format('d-m-Y'),
         ];
     }
 }

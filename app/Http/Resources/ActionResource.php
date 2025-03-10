@@ -19,7 +19,7 @@ class ActionResource extends JsonResource
             'product_id' => $this->actionable_id,
             'action_type' => $this->action_type,
             'data' => json_decode($this->data, true), // JSON ma'lumotlarni array ko'rinishida qaytarish
-            'created_at' => $this->created_at->format('Y-m-d H:i:s'),
+            'created_at' => $this->created_at->format('d-m-Y H:i:s'),
         ];
     }
 }

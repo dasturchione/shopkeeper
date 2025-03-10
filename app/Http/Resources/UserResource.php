@@ -19,7 +19,7 @@ class UserResource extends JsonResource
             'name'          => $this->name,
             'image_path'    => $this->image_path ? url('storage/' . $this->users->image_path) : url('storage/user_images/user_image.png'),
             'role'          => $this->role->name,
-            'created_at'    => $this->created_at->toDateTimeString(),
+            'created_at'    => $this->created_at->format('d-m-Y'),
         ];
     }
 }

@@ -51,8 +51,8 @@ class SoldItemResource extends JsonResource
                     'discount'      => $item->discount,
                     'warranty'      => $item->warranty,
                     'warranty_type' => $item->warranty_type,
-                    'created_at'    => $item->created_at->format('Y-m-d'),
-                    'updated_at'    => $item->updated_at->format('Y-m-d'),
+                    'created_at'    => $item->created_at->format('d-m-Y'),
+                    'updated_at'    => $item->updated_at->format('d-m-Y'),
                 ];
             }),
 
