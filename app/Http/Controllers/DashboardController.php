@@ -44,7 +44,7 @@ class DashboardController extends Controller
         $days = [];
         for ($day = 1; $day <= $daysInMonth; $day++) {
 
-            $dates[] = Carbon::createFromFormat('Y-m-d', "{$currentYear}-{$currentMonth}-{$day}")->format('d-m');
+            $dates[] = Carbon::create($currentYear, $currentMonth, $day)->format('Y-m-d');
             $days[] = Carbon::createFromFormat('Y-m-d', "{$currentYear}-{$currentMonth}-{$day}")->format('d-M');
         }
 
@@ -54,7 +54,7 @@ class DashboardController extends Controller
         ];
 
         foreach ($dates as $date) {
-            $formattedDate = Carbon::createFromFormat('d-m', $date)->format('Y-m-d');
+            $formattedDate = $date;
             $ordersCount['total_income_cash_register'][] = SoldGroup::whereDate('sold_groups.created_at', $formattedDate)
                 ->where('sold_groups.status', true)
                 ->where('sold_groups.store_id', $user->store_id)
