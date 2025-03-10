@@ -198,4 +198,16 @@ class DashboardController extends Controller
             ],
         ]);
     }
+
+    public function getFilterOptionsYear()
+    {
+        $soldYears = SoldGroup::selectRaw("DATE_FORMAT(created_at, '%Y') as value, DATE_FORMAT(created_at, '%Y') as label")
+            ->groupBy('value', 'label')
+            ->orderByRaw("MIN(created_at) DESC")
+            ->get();
+
+        return response()->json([
+            "filter" => $soldYears
+        ]);
+    }
 }

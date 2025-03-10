@@ -71,6 +71,7 @@ Route::group(['middleware' => ['auth:sanctum']], function () {
     Route::get('/admin/dashboard/byyear', [DashboardController::class, 'getOrdersByYear']);
     Route::get('/admin/dashboard/widget', [DashboardController::class, 'getWidgetInfo']);
     Route::get('/admin/dashboard/filter/byday', [DashboardController::class, 'getFilterOptions']);
+    Route::get('/admin/dashboard/filter/byyear', [DashboardController::class, 'getFilterOptionsYear']);
 
     Route::post('/logout', [AuthController::class, 'logout']);
 });
