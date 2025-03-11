@@ -38,31 +38,15 @@ class ProductController extends Controller
         if ($search) {
             $keywords = explode(' ', trim($search)); // Qidiruv matnini so‘zlarga ajratish
 
-            $query->where(function ($q) use ($keywords) {
+            $query->where(function ($q) use ($search) {
                 $hasCategory = false;
                 $hasName = false;
 
-                foreach ($keywords as $word) {
+                // foreach ($keywords as $word) {
                     // Kategoriya nomida qidirish
-                    $q->orWhere('name', 'like', '%' . $word . '%');
-                    $hasName = true;
+                    $q->orWhere('name', 'like', '%' . $search . '%');
 
-                    $q->orWhereHas('category', function ($subQuery) use ($word, &$hasCategory) {
-                        $subQuery->where('name', 'like', '%' . $word . '%');
-                        $hasCategory = true;
-                    });
-
-                    // Sana formatiga mos kelishini tekshirish
-                    if (preg_match('/\d{4}-\d{2}-\d{2}/', $word)) {
-                        $date = Carbon::parse($word)->format('Y-m-d');
-                        $q->orWhereDate('created_at', $date);
-                    }
-                }
-
-                // Faqat kategoriya bo'yicha natija chiqishining oldini olish
-                if ($hasCategory && !$hasName) {
-                    $q->where('name', 'like', '%%'); // Name bo‘yicha ham hech bo‘lmaganda bir shart qo‘yish kerak
-                }
+                // }
             });
         }
 
