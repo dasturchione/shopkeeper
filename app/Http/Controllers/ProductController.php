@@ -38,15 +38,10 @@ class ProductController extends Controller
         if ($search) {
             $keywords = explode(' ', trim($search)); // Qidiruv matnini so‘zlarga ajratish
 
-            $query->where(function ($q) use ($search) {
-                $hasCategory = false;
-                $hasName = false;
-
-                // foreach ($keywords as $word) {
-                    // Kategoriya nomida qidirish
-                    $q->orWhere('name', 'like', '%' . $search . '%');
-
-                // }
+            $query->where(function ($q) use ($keywords) {
+                foreach ($keywords as $word) {
+                    $q->where('name', 'like', '%' . $word . '%');
+                }
             });
         }
 
@@ -235,7 +230,7 @@ class ProductController extends Controller
 
     public function showBarcode($id)
     {
-        $product = Product::where('barcode',$id)->first();
+        $product = Product::where('barcode', $id)->first();
         if (!$product) {
             return response()->json([
                 'error' => "Product not found"
@@ -267,7 +262,8 @@ class ProductController extends Controller
         ]);
     }
 
-    public function barcodegen(){
+    public function barcodegen()
+    {
         $barcode = $this->calculator->generateUniqueBarcode();
 
         return response()->json(['barcode' => $barcode]);
