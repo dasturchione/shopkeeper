@@ -36,7 +36,7 @@ class ProductController extends Controller
         $query = Product::query();
 
         if ($search) {
-            $keywords = explode(' ', trim($search)); // Qidiruv matnini so‘zlarga ajratish
+            $keywords = explode(' ', trim($search));
 
             $query->where(function ($q) use ($keywords) {
                 foreach ($keywords as $word) {
@@ -255,11 +255,18 @@ class ProductController extends Controller
             ], 404);
         }
 
-        $product->delete();
-
-        return response()->json([
-            'message' => "Delete success"
-        ]);
+        try {
+            $product->delete();
+            return response()->json([
+                'message' => "Delete success"
+            ]);
+        } catch (\Exception $e) {
+            $product->is_active = false;
+            $product->save();
+            return response()->json([
+                'message' => "Product could not be deleted, set to inactive"
+            ]);
+        }
     }
 
     public function barcodegen()

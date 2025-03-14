@@ -7,6 +7,7 @@ use App\Http\Controllers\AuthController;
 use App\Http\Controllers\BrandController;
 use App\Http\Controllers\CategoryController;
 use App\Http\Controllers\ClientController;
+use App\Http\Controllers\CourseController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\ProductController;
 use App\Http\Controllers\SaleController;
@@ -61,9 +62,14 @@ Route::group(['middleware' => ['auth:sanctum']], function () {
     Route::get('/barcode', [ProductController::class, 'addBarcodesToProducts']);
 
     Route::get('admin/users', [UserController::class, 'index']);
-    Route::get('admin/user/{id}', [UserController::class, 'show']);
+    Route::get('admin/users/sessions/{id?}', [UserController::class, 'sessions']);
+    Route::get('admin/users/action/{id?}', [ActionController::class, 'getUserActions']);
+    Route::get('admin/user/{id?}', [UserController::class, 'show']);
     Route::post('admin/adduser', [UserController::class, 'store']);
     Route::post('admin/edituser/{id}', [UserController::class, 'edit']);
+
+    Route::get('/admin/courses', [CourseController::class, 'index']);
+    Route::post('/admin/createcourse', [CourseController::class, 'store']);
 
     Route::get('/admin/action/product/{id}', [ActionController::class, 'getProductActions']);
 
