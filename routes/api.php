@@ -58,6 +58,7 @@ Route::group(['middleware' => ['auth:sanctum']], function () {
     Route::post('/admin/addproductsold/{id}', [SoldController::class, 'addProduct']);
     Route::get('/admin/soldlist', [SaleController::class, 'index']);
     Route::get('/admin/solditems/{id}', [SoldController::class, 'soldItems']);
+    Route::post('/admin/solditem/discountedit/{id}', [SoldController::class, 'soldItemDiscount']);
     Route::post('/admin/productback', [SoldController::class, 'backProduct']);
     Route::get('/barcode', [ProductController::class, 'addBarcodesToProducts']);
 

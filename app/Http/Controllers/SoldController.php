@@ -262,4 +262,25 @@ class SoldController extends Controller
             'message' => 'Product returned successfully!'
         ]);
     }
+
+    public function soldItemDiscount(Request $request, $id)
+    {
+        $response = $this->permissionService->hasPermission('sold_goods', 'edit');
+
+        if ($response) {
+            return $response;
+        }
+
+        $solditem = SoldItem::find($id);
+
+        if (!$solditem) {
+            return response()->json(['error' => 'Sold item not found'], 404);
+        }
+
+        $solditem->update([
+            'discount' => $request->discount,
+        ]);
+
+        return response()->json(['message' => 'Discount updated successfully'], 200);
+    }
 }
