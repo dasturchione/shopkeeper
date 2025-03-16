@@ -26,7 +26,7 @@ class SaleController extends Controller
 
     public function index()
     {
-        $response = $this->permissionService->hasPermission('sold', 'view');
+        $response = $this->permissionService->hasPermission('sold_goods', 'view');
 
         if ($response) {
             return $response;
@@ -44,7 +44,7 @@ class SaleController extends Controller
                     $date = Carbon::parse($match[0])->format('Y-m-d');
                     $q->orWhereDate('created_at', $date);
                 }
-        
+
                 // ID bo‘yicha qidirish (raqam bo‘lsa)
                 if (is_numeric($search)) {
                     $q->orWhere('id', $search);
