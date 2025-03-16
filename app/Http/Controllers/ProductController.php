@@ -40,9 +40,9 @@ class ProductController extends Controller
 
             $query->where(function ($q) use ($keywords) {
                 foreach ($keywords as $word) {
-                    $q->where('name', 'like', '%' . $word . '%');
+                    $q->orWhere('name', 'like', '%' . $word . '%');
                 }
-            });
+            })->orWhere('barcode', 'like', '%' . $search . '%');
         }
 
         $products = $query->where('quantity', '>', 0)->where('is_active', true)->latest()->paginate(10);
@@ -67,16 +67,16 @@ class ProductController extends Controller
 
             $query->where(function ($q) use ($keywords) {
                 foreach ($keywords as $word) {
-                    $q->where('name', 'like', '%' . $word . '%');
+                    $q->orWhere('name', 'like', '%' . $word . '%');
                 }
-            });
+            })->orWhere('barcode', 'like', '%' . $search . '%');
         }
 
         $products = $query->where(function ($q) {
             $q->where('quantity', '<', 1)->orWhere('is_active', false);
         })
-        ->latest()
-        ->paginate(10);
+            ->latest()
+            ->paginate(10);
 
 
         return ProductResource::collection($products);
