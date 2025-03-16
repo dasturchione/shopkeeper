@@ -25,7 +25,7 @@ class ProductController extends Controller
 
     public function index()
     {
-        $response = $this->permissionService->hasPermission('product', 'view');
+        $response = $this->permissionService->hasPermission('goods', 'view');
 
         if ($response) {
             return $response;
@@ -52,7 +52,7 @@ class ProductController extends Controller
 
     public function store(Request $request)
     {
-        $response = $this->permissionService->hasPermission('product', 'add');
+        $response = $this->permissionService->hasPermission('goods', 'add');
 
         if ($response) {
             return $response;
@@ -123,7 +123,7 @@ class ProductController extends Controller
 
     public function update(Request $request, $id)
     {
-        $response = $this->permissionService->hasPermission('product', 'edit');
+        $response = $this->permissionService->hasPermission('goods', 'edit');
 
         if ($response) {
             return $response;
@@ -242,7 +242,7 @@ class ProductController extends Controller
 
     public function destroy($id)
     {
-        $response = $this->permissionService->hasPermission('product', 'delete');
+        $response = $this->permissionService->hasPermission('goods', 'delete');
 
         if ($response) {
             return $response;
