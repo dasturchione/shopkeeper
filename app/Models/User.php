@@ -80,7 +80,6 @@ class User extends Authenticatable
             foreach ($allPermissions as $permission) {
                 $rolePermission = $rolePermissions->get($permission->id);
 
-                // Har bir permission uchun ruxsatlar belgilash
                 $permissions[$permission->short_code] = [
                     'can_view' => $rolePermission ? (bool) $rolePermission->can_view : false,
                     'can_edit' => $rolePermission ? (bool) $rolePermission->can_edit : false,

@@ -11,7 +11,8 @@ use Laravel\Sanctum\PersonalAccessToken;
 
 class UserController extends Controller
 {
-    public function index () {
+    public function index()
+    {
         $users = User::get();
 
         return UserResource::collection($users);
@@ -32,5 +33,12 @@ class UserController extends Controller
             ->paginate(20);
 
         return SessionResource::collection($tokens);
+    }
+
+    public function permissions() {
+        $user = Auth::user();
+        return response()->json([
+            'data' => $user->permissions
+        ]);
     }
 }

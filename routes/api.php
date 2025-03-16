@@ -63,6 +63,7 @@ Route::group(['middleware' => ['auth:sanctum']], function () {
     Route::get('/barcode', [ProductController::class, 'addBarcodesToProducts']);
 
     Route::get('admin/users', [UserController::class, 'index']);
+    Route::get('admin/permission/user', [UserController::class, 'permissions']);
     Route::get('admin/users/sessions/{id?}', [UserController::class, 'sessions']);
     Route::get('admin/users/action/{id?}', [ActionController::class, 'getUserActions']);
     Route::get('admin/user/{id?}', [UserController::class, 'show']);
