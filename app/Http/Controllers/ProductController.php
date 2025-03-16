@@ -50,6 +50,38 @@ class ProductController extends Controller
         return ProductResource::collection($products);
     }
 
+    public function indexArchive()
+    {
+        $response = $this->permissionService->hasPermission('archive_goods', 'view');
+
+        if ($response) {
+            return $response;
+        }
+
+        $search = request()->query('search');
+
+        $query = Product::query();
+
+        if ($search) {
+            $keywords = explode(' ', trim($search));
+
+            $query->where(function ($q) use ($keywords) {
+                foreach ($keywords as $word) {
+                    $q->where('name', 'like', '%' . $word . '%');
+                }
+            });
+        }
+
+        $products = $query->where(function ($q) {
+            $q->where('quantity', '<', 1)->orWhere('is_active', false);
+        })
+        ->latest()
+        ->paginate(10);
+
+
+        return ProductResource::collection($products);
+    }
+
     public function store(Request $request)
     {
         $response = $this->permissionService->hasPermission('goods', 'add');

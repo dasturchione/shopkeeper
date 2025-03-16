@@ -47,6 +47,7 @@ Route::group(['middleware' => ['auth:sanctum']], function () {
     Route::post('/admin/deletesupplier/{id}', [SupplierController::class, 'destroy']);
 
     Route::get('/admin/products', [ProductController::class, 'index']);
+    Route::get('/admin/archive/products', [ProductController::class, 'indexArchive']);
     Route::get('/admin/product/{id}', [ProductController::class, 'show']);
     Route::get('/admin/productbybarcode/{id}', [ProductController::class, 'showBarcode']);
     Route::post('/admin/createproduct', [ProductController::class, 'store']);
