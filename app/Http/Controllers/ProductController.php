@@ -262,7 +262,7 @@ class ProductController extends Controller
 
     public function showBarcode($id)
     {
-        $product = Product::where('barcode', $id)->first();
+        $product = Product::where('barcode', $id)->where('quantity', '>', 0)->where('is_active', true)->first();
         if (!$product) {
             return response()->json([
                 'error' => "Product not found"
