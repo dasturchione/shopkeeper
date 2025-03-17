@@ -33,19 +33,20 @@ class ProductController extends Controller
 
         $search = request()->query('search');
 
-        $query = Product::query();
+        $query = Product::query()->where('quantity', '>', 0)->where('is_active', true);
 
         if ($search) {
             $keywords = explode(' ', trim($search));
 
-            $query->where(function ($q) use ($keywords) {
+            $query->where(function ($q) use ($keywords, $search) {
                 foreach ($keywords as $word) {
                     $q->orWhere('name', 'like', '%' . $word . '%');
                 }
-            })->orWhere('barcode', 'like', '%' . $search . '%');
+                $q->orWhere('barcode', 'like', '%' . $search . '%');
+            });
         }
 
-        $products = $query->where('quantity', '>', 0)->where('is_active', true)->latest()->paginate(10);
+        $products = $query->latest()->paginate(10);
 
         return ProductResource::collection($products);
     }
@@ -60,23 +61,22 @@ class ProductController extends Controller
 
         $search = request()->query('search');
 
-        $query = Product::query();
+        $query = Product::query()->where(function ($q) {
+            $q->where('quantity', '<', 1)->orWhere('is_active', false);
+        });
 
-        if ($search) {
+        if (!empty($search)) {
             $keywords = explode(' ', trim($search));
 
-            $query->where(function ($q) use ($keywords) {
+            $query->where(function ($q) use ($keywords, $search) {
                 foreach ($keywords as $word) {
                     $q->orWhere('name', 'like', '%' . $word . '%');
                 }
-            })->orWhere('barcode', 'like', '%' . $search . '%');
+                $q->orWhere('barcode', 'like', '%' . $search . '%');
+            });
         }
 
-        $products = $query->where(function ($q) {
-            $q->where('quantity', '<', 1)->orWhere('is_active', false);
-        })
-            ->latest()
-            ->paginate(10);
+        $products = $query->latest()->paginate(10);
 
 
         return ProductResource::collection($products);
