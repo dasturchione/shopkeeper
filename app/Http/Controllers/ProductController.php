@@ -10,6 +10,7 @@ use Illuminate\Support\Facades\Auth;
 use App\Http\Resources\ProductResource;
 use Illuminate\Support\Facades\Validator;
 use Carbon\Carbon;
+use Rap2hpoutre\FastExcel\FastExcel;
 
 class ProductController extends Controller
 {
@@ -299,6 +300,32 @@ class ProductController extends Controller
                 'message' => "Product could not be deleted, set to inactive"
             ]);
         }
+    }
+
+    public function exportXlsx()
+    {
+        $products = Product::where('quantity', '>', 0)->where('is_active', true)->get();
+
+        return (new FastExcel($products))->download('products_' . now()->format("d-m-Y_H-i-s") . '.xlsx', function ($product) {
+            return [
+                'ID'                => $product->id,
+                "Brend"             => optional($product->brand)->name ?? 'Noma’lum',
+                "Kategoriya"        => optional($product->category)->name ?? 'Noma’lum',
+                "Taminotchi"        => optional($product->supplier)->name ?? 'Noma’lum',
+                "Qabul qiluvchi"    => optional($product->user)->name ?? 'Noma’lum',
+                "Holati"            => match ($product->condition) {
+                    'new'      => 'Yangi',
+                    'used'     => 'Ishlatilgan',
+                    'openbox'  => 'Ochilgan',
+                    default    => 'Noma’lum'
+                },
+                'Nomi'              => $product->name,
+                'Barkod'            => $product->barcode,
+                'Kirim narxi'       => $product->in_price,
+                'Sotish narxi'      => $product->sale_price,
+                'Miqdori'           => $product->quantity,
+            ];
+        });
     }
 
     public function barcodegen()

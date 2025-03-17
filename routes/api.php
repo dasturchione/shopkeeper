@@ -16,6 +16,7 @@ use App\Http\Controllers\SupplierController;
 use App\Http\Controllers\UserController;
 
 Route::post('/admin/login', [AuthController::class, 'loginAdmin']);
+Route::get('/admin/exports/products/xls', [ProductController::class, "exportXlsx"]);
 Route::group(['middleware' => ['auth:sanctum']], function () {
 
     Route::get('/admin/brands', [BrandController::class, 'index']);
@@ -81,6 +82,7 @@ Route::group(['middleware' => ['auth:sanctum']], function () {
     Route::get('/admin/dashboard/widget', [DashboardController::class, 'getWidgetInfo']);
     Route::get('/admin/dashboard/filter/byday', [DashboardController::class, 'getFilterOptions']);
     Route::get('/admin/dashboard/filter/byyear', [DashboardController::class, 'getFilterOptionsYear']);
+    Route::get('/admin/dashboard/topsales', [DashboardController::class, 'exportTopSoldProducts']);
 
     Route::post('/logout', [AuthController::class, 'logout']);
 });

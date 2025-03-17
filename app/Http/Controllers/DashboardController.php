@@ -109,6 +109,40 @@ class DashboardController extends Controller
         ]);
     }
 
+    public function exportTopSoldProducts(Request $request)
+    {
+        $month = $request->query('filter'); // Masalan, "03-2025"
+
+        if (!$month) {
+            return response()->json(['error' => 'Oy va yil berilishi shart!'], 400);
+        }
+
+        [$monthNum, $year] = explode('-', $month);
+
+        // Eng ko‘p sotilgan mahsulotlar ro‘yxati
+        $products = SoldItem::select('product_id', DB::raw('SUM(quantity) as total_sold'))
+            ->whereYear('created_at', $year)
+            ->whereMonth('created_at', $monthNum)
+            ->groupBy('product_id')
+            ->orderByDesc('total_sold')
+            ->with('product') // Mahsulot ma'lumotlarini olish
+            ->get();
+
+        return response()->json([
+            'data' => $products->map(function ($item) {
+                return [
+                    'id'   => $item->product_id,
+                    'name' => optional($item->product)->name ?? 'Noma’lum',
+                    'quantity' => (int) $item->total_sold,
+                    'in_price'  => (int) $item->product->in_price,
+                    'sale_price'  => (int)  $item->product->sale_price,
+                    'total_in_price'  => $item->product->in_price * $item->total_sold,
+                    'total_sale_price'  => $item->product->sale_price * $item->total_sold,
+                ];
+            }),
+        ]);
+    }
+
     public function getFilterOptions()
     {
         $soldMonths = SoldGroup::selectRaw("DATE_FORMAT(created_at, '%Y-%m') as value, DATE_FORMAT(created_at, '%M %Y') as label")
