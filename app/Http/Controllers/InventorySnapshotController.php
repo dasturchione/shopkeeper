@@ -66,6 +66,7 @@ class InventorySnapshotController extends Controller
             'product_id' => 'required|exists:products,id',
             'stock_quantity' => 'required|numeric|min:0',
         ]);
+
         if ($validator->fails()) {
             return response()->json($validator->errors(), 422);
         }
@@ -77,10 +78,18 @@ class InventorySnapshotController extends Controller
 
         $existingItem = InventorySnapshotItem::where('inventory_snapshot_group_id', $id)
             ->where('product_id', $request->product_id)
-            ->exists();
+            ->first();
 
         if ($existingItem) {
-            return response()->json(['message' => 'Bu mahsulot ushbu hisobotda allaqachon mavjud!'], 400);
+            // Agar bor bo‘lsa, stock_quantity ni yangilaymiz
+            $existingItem->update([
+                'stock_quantity' => $request->stock_quantity
+            ]);
+
+            return response()->json([
+                'message' => 'Mahsulot miqdori yangilandi!',
+                'data' => $existingItem
+            ], 200);
         }
 
         $item = InventorySnapshotItem::create([
@@ -143,6 +152,15 @@ class InventorySnapshotController extends Controller
         ]);
 
         return response()->json(['message' => 'Inventory group completed successfully'], 200);
+    }
+
+    public function activateInventoryGroup($group_id)
+    {
+        InventorySnapshotGroup::where('id', $group_id)->update([
+            'is_active' => true
+        ]);
+
+        return response()->json(['message' => 'Inventory group activate successfully'], 200);
     }
 
     public function exportXlsx($id)

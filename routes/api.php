@@ -91,6 +91,7 @@ Route::group(['middleware' => ['auth:sanctum']], function () {
     Route::post('/admin/inventorysnapshot/addtogroup/{id}', [InventorySnapshotController::class, 'addItem']);
     Route::get('/admin/stockbybarcode/{id}', [InventorySnapshotController::class, 'showBarcode']);
     Route::post('/admin/inventorysnapshot/complate/{id}', [InventorySnapshotController::class, 'completeInventoryGroup']);
+    Route::post('/admin/inventorysnapshot/activate/{id}', [InventorySnapshotController::class, 'activateInventoryGroup']);
     Route::get('/admin/exports/remaining-stock/{id}/xls', [InventorySnapshotController::class, 'exportXlsx']);
 
     Route::post('/logout', [AuthController::class, 'logout']);
