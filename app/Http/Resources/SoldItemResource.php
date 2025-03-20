@@ -39,7 +39,7 @@ class SoldItemResource extends JsonResource
                     'product'       => [
                         'id'    => $item->product->id,
                         'name'  => $item->product->name,
-                        'brand' => $item->product->brand->name,
+                        'brand' => optional($item->product->brand)->name,
                         'category' => $item->product->category->name,
                         'supplier' => $item->product->supplier->name,
                         'receiver' => $item->product->user->name,

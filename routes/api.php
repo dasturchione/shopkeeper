@@ -9,6 +9,7 @@ use App\Http\Controllers\CategoryController;
 use App\Http\Controllers\ClientController;
 use App\Http\Controllers\CourseController;
 use App\Http\Controllers\DashboardController;
+use App\Http\Controllers\InventorySnapshotController;
 use App\Http\Controllers\ProductController;
 use App\Http\Controllers\SaleController;
 use App\Http\Controllers\SoldController;
@@ -83,6 +84,14 @@ Route::group(['middleware' => ['auth:sanctum']], function () {
     Route::get('/admin/dashboard/filter/byday', [DashboardController::class, 'getFilterOptions']);
     Route::get('/admin/dashboard/filter/byyear', [DashboardController::class, 'getFilterOptionsYear']);
     Route::get('/admin/dashboard/topsales', [DashboardController::class, 'exportTopSoldProducts']);
+
+    Route::get('/admin/inventorysnapshots', [InventorySnapshotController::class, 'index']);
+    Route::get('/admin/inventorysnapshot/items/{id}', [InventorySnapshotController::class, 'indexItems']);
+    Route::post('/admin/inventorysnapshot/create', [InventorySnapshotController::class, 'store']);
+    Route::post('/admin/inventorysnapshot/addtogroup/{id}', [InventorySnapshotController::class, 'addItem']);
+    Route::get('/admin/stockbybarcode/{id}', [InventorySnapshotController::class, 'showBarcode']);
+    Route::post('/admin/inventorysnapshot/complate/{id}', [InventorySnapshotController::class, 'completeInventoryGroup']);
+    Route::get('/admin/exports/remaining-stock/{id}/xls', [InventorySnapshotController::class, 'exportXlsx']);
 
     Route::post('/logout', [AuthController::class, 'logout']);
 });
