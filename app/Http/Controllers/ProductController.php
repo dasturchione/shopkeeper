@@ -38,14 +38,17 @@ class ProductController extends Controller
 
         if ($search) {
             $keywords = explode(' ', trim($search));
-            $query->where(function ($q) use ($keywords) {
+
+            $query->where(function ($q) use ($keywords, $search) {
                 foreach ($keywords as $word) {
-                    $q->where('name', 'like', '%' . $word . '%');
+                    $q->where('name', 'like', '%' . $word . '%'); // Barcha so‘zlar bo‘lishi kerak
                 }
-            })->orWhere('barcode', 'like', '%' . $search . '%')
-                ->orWhereHas('category', function ($q) use ($search) { // Category bo‘yicha qidiruv
-                    $q->where('name', 'like', '%' . $search . '%');
-                });
+
+                $q->orWhere('barcode', 'like', '%' . $search . '%')
+                    ->orWhereHas('category', function ($q) use ($search) {
+                        $q->where('name', 'like', '%' . $search . '%');
+                    });
+            });
         }
 
         $products = $query->latest()->paginate(10);
@@ -69,14 +72,17 @@ class ProductController extends Controller
 
         if ($search) {
             $keywords = explode(' ', trim($search));
-            $query->where(function ($q) use ($keywords) {
+
+            $query->where(function ($q) use ($keywords, $search) {
                 foreach ($keywords as $word) {
-                    $q->where('name', 'like', '%' . $word . '%');
+                    $q->where('name', 'like', '%' . $word . '%'); // Barcha so‘zlar bo‘lishi kerak
                 }
-            })->orWhere('barcode', 'like', '%' . $search . '%')
-                ->orWhereHas('category', function ($q) use ($search) { // Category bo‘yicha qidiruv
-                    $q->where('name', 'like', '%' . $search . '%');
-                });
+
+                $q->orWhere('barcode', 'like', '%' . $search . '%')
+                    ->orWhereHas('category', function ($q) use ($search) {
+                        $q->where('name', 'like', '%' . $search . '%');
+                    });
+            });
         }
 
         $products = $query->latest()->paginate(10);
