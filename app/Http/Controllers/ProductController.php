@@ -38,13 +38,14 @@ class ProductController extends Controller
 
         if ($search) {
             $keywords = explode(' ', trim($search));
-
-            $query->where(function ($q) use ($keywords, $search) {
+            $query->where(function ($q) use ($keywords) {
                 foreach ($keywords as $word) {
-                    $q->orWhere('name', 'like', '%' . $word . '%');
+                    $q->where('name', 'like', '%' . $word . '%');
                 }
-                $q->orWhere('barcode', 'like', '%' . $search . '%');
-            });
+            })->orWhere('barcode', 'like', '%' . $search . '%')
+                ->orWhereHas('category', function ($q) use ($search) { // Category bo‘yicha qidiruv
+                    $q->where('name', 'like', '%' . $search . '%');
+                });
         }
 
         $products = $query->latest()->paginate(10);
@@ -66,15 +67,16 @@ class ProductController extends Controller
             $q->where('quantity', '<', 1)->orWhere('is_active', false);
         });
 
-        if (!empty($search)) {
+        if ($search) {
             $keywords = explode(' ', trim($search));
-
-            $query->where(function ($q) use ($keywords, $search) {
+            $query->where(function ($q) use ($keywords) {
                 foreach ($keywords as $word) {
-                    $q->orWhere('name', 'like', '%' . $word . '%');
+                    $q->where('name', 'like', '%' . $word . '%');
                 }
-                $q->orWhere('barcode', 'like', '%' . $search . '%');
-            });
+            })->orWhere('barcode', 'like', '%' . $search . '%')
+                ->orWhereHas('category', function ($q) use ($search) { // Category bo‘yicha qidiruv
+                    $q->where('name', 'like', '%' . $search . '%');
+                });
         }
 
         $products = $query->latest()->paginate(10);
