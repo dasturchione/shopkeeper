@@ -91,7 +91,7 @@ class SoldController extends Controller
 
     public function addProduct(Request $request, $id)
     {
-        $response = $this->permissionService->hasPermission('sold', 'edit');
+        $response = $this->permissionService->hasPermission('sold_goods', 'edit');
 
         if ($response) {
             return $response;
