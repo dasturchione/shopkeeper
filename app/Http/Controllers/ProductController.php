@@ -75,7 +75,7 @@ class ProductController extends Controller
 
             $query->where(function ($q) use ($keywords, $search) {
                 foreach ($keywords as $word) {
-                    $q->where('name', 'like', '%' . $word . '%'); // Barcha so‘zlar bo‘lishi kerak
+                    $q->where('name', 'like', '%' . $word . '%');
                 }
 
                 $q->orWhere('barcode', 'like', '%' . $search . '%')
