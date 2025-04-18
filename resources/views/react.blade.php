@@ -6,7 +6,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>ShopKeeper</title>
     <link rel="stylesheet" href="{{ asset('assets/index-0jRam-fD.css') }}">
-    <script type="module" src="{{ asset('assets/index-Bogp0vut.js') }}"></script>
+    <script type="module" src="{{ asset('assets/index-Vo2q5y9o.js') }}"></script>
   </head>
   <body class="bg-lightPrimary font-dm dark">
     <div id="root"></div>
